@@ -5,7 +5,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, spacing, borderRadius, typography } from '../theme';
-import { javaTopics } from '../data/javaTopics';
+import { allJavaTopics } from '../data/allJavaTopics';
+import { JavaTopic } from '../data/javaTopics';
 
 export function JavaTopicsScreen({ navigation }: any) {
   return (
@@ -13,7 +14,7 @@ export function JavaTopicsScreen({ navigation }: any) {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         <HeaderSection />
         <View style={styles.grid}>
-          {javaTopics.map((topic, i) => (
+          {allJavaTopics.map((topic, i) => (
             <TopicCard
               key={topic.id}
               topic={topic}
@@ -29,14 +30,11 @@ export function JavaTopicsScreen({ navigation }: any) {
 
 function HeaderSection() {
   const opacity = useSharedValue(0);
-  const y = useSharedValue(-15);
   useEffect(() => {
     opacity.value = withTiming(1, { duration: 400 });
-    y.value = withSpring(0, { damping: 18 });
   }, []);
   const style = useAnimatedStyle(() => ({
     opacity: opacity.value,
-    transform: [{ translateY: y.value }],
   }));
   return (
     <Animated.View style={[styles.header, style]}>
@@ -46,7 +44,7 @@ function HeaderSection() {
   );
 }
 
-function TopicCard({ topic, index, onPress }: { topic: typeof javaTopics[0]; index: number; onPress: () => void }) {
+function TopicCard({ topic, index, onPress }: { topic: JavaTopic; index: number; onPress: () => void }) {
   const opacity = useSharedValue(0);
   const scale = useSharedValue(0.85);
   const pressScale = useSharedValue(1);

@@ -36,16 +36,13 @@ export function ProblemListScreen({ route, navigation }: any) {
 
 function CategoryHeader({ category }: { category: DSACategory }) {
   const opacity = useSharedValue(0);
-  const scale = useSharedValue(0.9);
 
   useEffect(() => {
     opacity.value = withTiming(1, { duration: 400 });
-    scale.value = withSpring(1, { damping: 15 });
   }, []);
 
   const style = useAnimatedStyle(() => ({
     opacity: opacity.value,
-    transform: [{ scale: scale.value }],
   }));
 
   return (
@@ -66,20 +63,18 @@ function ProblemCard({ problem, index, color, onPress }: {
   problem: Problem; index: number; color: string; onPress: () => void;
 }) {
   const opacity = useSharedValue(0);
-  const translateY = useSharedValue(20);
   const scale = useSharedValue(1);
 
   useEffect(() => {
     const t = setTimeout(() => {
       opacity.value = withTiming(1, { duration: 300 });
-      translateY.value = withSpring(0, { damping: 20 });
-    }, index * 100);
+    }, index * 70);
     return () => clearTimeout(t);
   }, []);
 
   const cardStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
-    transform: [{ translateY: translateY.value }, { scale: scale.value }],
+    transform: [{ scale: scale.value }],
   }));
 
   return (

@@ -5,24 +5,21 @@ import Animated, {
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, spacing, borderRadius, typography } from '../theme';
-import { javaTopics } from '../data/javaTopics';
+import { allJavaTopics } from '../data/allJavaTopics';
 import { AccordionQA } from '../components/AccordionQA';
 
 export function JavaQAScreen({ route }: any) {
   const { topicId } = route.params;
-  const topic = javaTopics.find(t => t.id === topicId)!;
+  const topic = allJavaTopics.find(t => t.id === topicId)!;
 
   const headerOpacity = useSharedValue(0);
-  const headerY = useSharedValue(-20);
 
   useEffect(() => {
     headerOpacity.value = withTiming(1, { duration: 400 });
-    headerY.value = withSpring(0, { damping: 18 });
   }, []);
 
   const headerStyle = useAnimatedStyle(() => ({
     opacity: headerOpacity.value,
-    transform: [{ translateY: headerY.value }],
   }));
 
   return (

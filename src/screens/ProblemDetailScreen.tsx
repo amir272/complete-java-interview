@@ -33,16 +33,13 @@ export function ProblemDetailScreen({ route }: any) {
   const [activeTab, setActiveTab] = useState<Tab>('problem');
 
   const headerOpacity = useSharedValue(0);
-  const headerY = useSharedValue(-20);
 
   useEffect(() => {
     headerOpacity.value = withTiming(1, { duration: 400 });
-    headerY.value = withSpring(0, { damping: 18 });
   }, []);
 
   const headerStyle = useAnimatedStyle(() => ({
     opacity: headerOpacity.value,
-    transform: [{ translateY: headerY.value }],
   }));
 
   return (
@@ -263,19 +260,16 @@ function ProblemTab({ statement, problem, color }: {
 
 function AnimatedSection({ children, delay }: { children: React.ReactNode; delay: number }) {
   const opacity = useSharedValue(0);
-  const y = useSharedValue(12);
 
   useEffect(() => {
     const t = setTimeout(() => {
       opacity.value = withTiming(1, { duration: 300 });
-      y.value = withSpring(0, { damping: 18 });
     }, delay);
     return () => clearTimeout(t);
   }, []);
 
   const style = useAnimatedStyle(() => ({
     opacity: opacity.value,
-    transform: [{ translateY: y.value }],
   }));
 
   return <Animated.View style={style}>{children}</Animated.View>;
@@ -310,19 +304,16 @@ function ExampleBlock({ example, index, color }: { example: ProblemExample; inde
 
 function ConstraintRow({ text, index, color }: { text: string; index: number; color: string }) {
   const opacity = useSharedValue(0);
-  const x = useSharedValue(-10);
 
   useEffect(() => {
     const t = setTimeout(() => {
       opacity.value = withTiming(1, { duration: 250 });
-      x.value = withSpring(0, { damping: 18 });
     }, index * 40);
     return () => clearTimeout(t);
   }, []);
 
   const style = useAnimatedStyle(() => ({
     opacity: opacity.value,
-    transform: [{ translateX: x.value }],
   }));
 
   return (
@@ -370,19 +361,16 @@ function ExampleTab({ example, color }: { example: any; color: string }) {
 
 function ExampleTabRow({ label, value, color, delay }: { label: string; value: string; color: string; delay: number }) {
   const opacity = useSharedValue(0);
-  const translateY = useSharedValue(10);
 
   useEffect(() => {
     const t = setTimeout(() => {
       opacity.value = withTiming(1, { duration: 300 });
-      translateY.value = withSpring(0, { damping: 18 });
     }, delay);
     return () => clearTimeout(t);
   }, []);
 
   const style = useAnimatedStyle(() => ({
     opacity: opacity.value,
-    transform: [{ translateY: translateY.value }],
   }));
 
   return (

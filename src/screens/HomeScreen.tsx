@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 import Animated, {
   useAnimatedStyle, useSharedValue, withSpring, withTiming,
-  withDelay, Easing, interpolate, withSequence,
+  withDelay, withSequence,
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, spacing, borderRadius, typography } from '../theme';
@@ -50,13 +50,11 @@ const QUICK_STATS = [
 
 export function HomeScreen({ navigation }: any) {
   const headerOpacity = useSharedValue(0);
-  const headerY = useSharedValue(-20);
   const pulseScale = useSharedValue(1);
 
   useEffect(() => {
-    headerOpacity.value = withTiming(1, { duration: 600, easing: Easing.out(Easing.cubic) });
-    headerY.value = withSpring(0, { damping: 20 });
-    pulseScale.value = withDelay(1000,
+    headerOpacity.value = withTiming(1, { duration: 500 });
+    pulseScale.value = withDelay(600,
       withSequence(
         withSpring(1.05, { damping: 8 }),
         withSpring(1, { damping: 12 })
@@ -66,7 +64,6 @@ export function HomeScreen({ navigation }: any) {
 
   const headerStyle = useAnimatedStyle(() => ({
     opacity: headerOpacity.value,
-    transform: [{ translateY: headerY.value }],
   }));
 
   const pulseStyle = useAnimatedStyle(() => ({
@@ -137,20 +134,18 @@ function StatCard({ stat, index }: { stat: typeof QUICK_STATS[0]; index: number 
 }
 
 function TopicCard({ topic, index, onPress }: { topic: typeof MAIN_TOPICS[0]; index: number; onPress: () => void }) {
-  const translateY = useSharedValue(50);
   const opacity = useSharedValue(0);
   const scale = useSharedValue(1);
 
   useEffect(() => {
     const t = setTimeout(() => {
-      translateY.value = withSpring(0, { damping: 20, stiffness: 180 });
       opacity.value = withTiming(1, { duration: 400 });
-    }, 700 + index * 120);
+    }, 400 + index * 100);
     return () => clearTimeout(t);
   }, []);
 
   const cardStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: translateY.value }, { scale: scale.value }],
+    transform: [{ scale: scale.value }],
     opacity: opacity.value,
   }));
 
@@ -177,19 +172,16 @@ function TopicCard({ topic, index, onPress }: { topic: typeof MAIN_TOPICS[0]; in
 
 function TipCard({ index }: { index: number }) {
   const opacity = useSharedValue(0);
-  const translateY = useSharedValue(30);
 
   useEffect(() => {
     const t = setTimeout(() => {
       opacity.value = withTiming(1, { duration: 400 });
-      translateY.value = withSpring(0, { damping: 18 });
-    }, 800 + index * 120);
+    }, 600 + index * 100);
     return () => clearTimeout(t);
   }, []);
 
   const style = useAnimatedStyle(() => ({
     opacity: opacity.value,
-    transform: [{ translateY: translateY.value }],
   }));
 
   return (

@@ -28,16 +28,13 @@ export function DSACategoriesScreen({ navigation }: any) {
 
 function HeaderSection() {
   const opacity = useSharedValue(0);
-  const y = useSharedValue(-15);
 
   useEffect(() => {
     opacity.value = withTiming(1, { duration: 400 });
-    y.value = withSpring(0, { damping: 18 });
   }, []);
 
   const style = useAnimatedStyle(() => ({
     opacity: opacity.value,
-    transform: [{ translateY: y.value }],
   }));
 
   return (
@@ -50,20 +47,18 @@ function HeaderSection() {
 
 function CategoryCard({ category, index, onPress }: { category: DSACategory; index: number; onPress: () => void }) {
   const opacity = useSharedValue(0);
-  const translateX = useSharedValue(-30);
   const scale = useSharedValue(1);
 
   useEffect(() => {
     const t = setTimeout(() => {
-      opacity.value = withTiming(1, { duration: 350 });
-      translateX.value = withSpring(0, { damping: 20 });
-    }, index * 80);
+      opacity.value = withTiming(1, { duration: 300 });
+    }, index * 60);
     return () => clearTimeout(t);
   }, []);
 
   const cardStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
-    transform: [{ translateX: translateX.value }, { scale: scale.value }],
+    transform: [{ scale: scale.value }],
   }));
 
   const handlePressIn = () => { scale.value = withSpring(0.97, { damping: 15 }); };

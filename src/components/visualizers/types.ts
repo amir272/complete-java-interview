@@ -115,6 +115,30 @@ export interface HashMapVisualizerData {
   caption?: string;
 }
 
+// ─── Pointer List visualizer (fast/slow, prev/curr/next, two-list merge) ────
+export interface PointerListNode {
+  id: number;              // stable identity for animation tracking
+  value: string | number;
+  status: CellStatus;
+}
+
+export interface ListPointer {
+  nodeId: number;          // node.id this pointer sits on  (-1 = off list / null)
+  label: string;           // 'SLOW' | 'FAST' | 'PREV' | 'CURR' | 'NEXT' | 'P1' | 'P2'
+  color: string;           // hex accent
+  emoji?: string;          // optional prefix emoji
+}
+
+export interface PointerListVisualizerData {
+  type: 'pointer-list';
+  rows: {
+    label?: string;        // row header e.g. "List 1:" or "Reversed:"
+    nodes: PointerListNode[];
+    pointers?: ListPointer[];   // pointers that ride on THIS row
+  }[];
+  caption?: string;
+}
+
 // ─── Union ──────────────────────────────────────────────────────────────────
 export type VisualizerData =
   | ArrayVisualizerData
@@ -124,4 +148,5 @@ export type VisualizerData =
   | IntervalVisualizerData
   | GridVisualizerData
   | LinkedListVisualizerData
-  | HashMapVisualizerData;
+  | HashMapVisualizerData
+  | PointerListVisualizerData;

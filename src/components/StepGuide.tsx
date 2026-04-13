@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View, Pressable, ScrollView } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -20,23 +20,49 @@ interface StepGuideProps {
   visualizers?: (VisualizerData | null)[];
 }
 
+const AUTO_PLAY_MS = 2000; // ms per step during auto-play
+
 export function StepGuide({ steps, accentColor, visualizers }: StepGuideProps) {
   const [activeStep, setActiveStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const [playing, setPlaying] = useState(false);
+  const playRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const contentOpacity = useSharedValue(1);
   const contentTranslateX = useSharedValue(0);
   const progressWidth = useSharedValue(0);
 
-  React.useEffect(() => {
+  // Keep a ref so the interval closure always sees the latest activeStep
+  const stepRef = useRef(activeStep);
+  useEffect(() => { stepRef.current = activeStep; }, [activeStep]);
+
+  useEffect(() => {
     progressWidth.value = withTiming(
       steps.length > 1 ? (activeStep / (steps.length - 1)) * 100 : 100,
       { duration: 500, easing: Easing.out(Easing.cubic) }
     );
   }, [activeStep, steps.length]);
 
+  // Auto-play tick
+  useEffect(() => {
+    if (playing) {
+      playRef.current = setInterval(() => {
+        const next = stepRef.current + 1;
+        if (next >= steps.length) {
+          setPlaying(false);
+        } else {
+          goToStep(next);
+          setCompletedSteps(prev => new Set([...prev, stepRef.current]));
+        }
+      }, AUTO_PLAY_MS);
+    } else {
+      if (playRef.current) clearInterval(playRef.current);
+    }
+    return () => { if (playRef.current) clearInterval(playRef.current); };
+  }, [playing, steps.length]);
+
   const goToStep = (idx: number) => {
-    const direction = idx > activeStep ? 1 : -1;
+    const direction = idx > stepRef.current ? 1 : -1;
     contentOpacity.value = withTiming(0, { duration: 150 }, () => {
       contentTranslateX.value = direction * 30;
     });
@@ -56,7 +82,21 @@ export function StepGuide({ steps, accentColor, visualizers }: StepGuideProps) {
   };
 
   const handlePrev = () => {
-    if (activeStep > 0) goToStep(activeStep - 1);
+    if (activeStep > 0) {
+      setPlaying(false);
+      goToStep(activeStep - 1);
+    }
+  };
+
+  const handlePlayPause = () => {
+    if (activeStep === steps.length - 1) {
+      // restart from beginning
+      setCompletedSteps(new Set());
+      goToStep(0);
+      setPlaying(true);
+    } else {
+      setPlaying(p => !p);
+    }
   };
 
   const contentStyle = useAnimatedStyle(() => ({
@@ -135,7 +175,15 @@ export function StepGuide({ steps, accentColor, visualizers }: StepGuideProps) {
           <Text style={styles.navBtnText}>← Prev</Text>
         </Pressable>
 
-        <Text style={styles.stepCounter}>{activeStep + 1} / {steps.length}</Text>
+        {/* Play / Pause button */}
+        <Pressable
+          style={[styles.playBtn, { backgroundColor: accentColor + '22', borderColor: accentColor + '55' }]}
+          onPress={handlePlayPause}
+        >
+          <Text style={[styles.playBtnText, { color: accentColor }]}>
+            {playing ? '⏸ Pause' : activeStep === steps.length - 1 ? '↺ Replay' : '▶ Play'}
+          </Text>
+        </Pressable>
 
         <Pressable
           style={[styles.navBtn, { backgroundColor: accentColor + '33' }, activeStep === steps.length - 1 && styles.navBtnDisabled]}
@@ -254,4 +302,11 @@ const styles = StyleSheet.create({
   navBtnDisabled: { opacity: 0.3 },
   navBtnText: { ...typography.bodySmall, color: colors.textSecondary, fontWeight: '600' },
   stepCounter: { ...typography.caption, color: colors.textMuted },
+  playBtn: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs + 2,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+  },
+  playBtnText: { ...typography.bodySmall, fontWeight: '700' },
 });

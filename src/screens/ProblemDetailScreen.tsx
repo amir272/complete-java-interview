@@ -9,13 +9,18 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, spacing, borderRadius, typography } from '../theme';
 import { allDSACategories } from '../data/allDSACategories';
 import { problemVisualizers } from '../data/visualizerData';
+import { problemVisualizersExtra } from '../data/visualizerDataExtra';
+
+const allProblemVisualizers = { ...problemVisualizers, ...problemVisualizersExtra };
 import { problemStatements, ProblemStatement, ProblemExample } from '../data/problemStatements';
 import { DifficultyBadge } from '../components/DifficultyBadge';
 import { PatternBadge } from '../components/PatternBadge';
 import { StepGuide } from '../components/StepGuide';
 import { CodeBlock } from '../components/CodeBlock';
+import { AlgorithmPlayer } from '../components/AlgorithmPlayer';
+import { algorithmAnimations } from '../data/algorithmFrames';
 
-type Tab = 'problem' | 'steps' | 'intuition' | 'code' | 'example';
+type Tab = 'problem' | 'steps' | 'intuition' | 'code' | 'example' | 'animate';
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'problem',   label: '📄 Problem' },
@@ -23,6 +28,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'intuition', label: '🧠 Intuition' },
   { id: 'code',      label: '💻 Code' },
   { id: 'example',   label: '🔍 Example' },
+  { id: 'animate',   label: '🎬 Animate' },
 ];
 
 export function ProblemDetailScreen({ route }: any) {
@@ -30,6 +36,7 @@ export function ProblemDetailScreen({ route }: any) {
   const category = allDSACategories.find(c => c.id === categoryId)!;
   const problem = category.problems.find(p => p.id === problemId)!;
   const statement = problemStatements[problem.id];
+  const visualizerSteps = allProblemVisualizers[problem.id];
   const [activeTab, setActiveTab] = useState<Tab>('problem');
 
   const headerOpacity = useSharedValue(0);
@@ -77,6 +84,7 @@ export function ProblemDetailScreen({ route }: any) {
           problem={problem}
           statement={statement}
           color={category.color}
+          visualizerSteps={visualizerSteps}
         />
       </ScrollView>
     </SafeAreaView>
@@ -142,12 +150,14 @@ function TabButton({ tab, active, color, onPress }: { tab: { id: Tab; label: str
   );
 }
 
-function TabContent({ activeTab, problem, statement, color }: {
+function TabContent({ activeTab, problem, statement, color, visualizerSteps }: {
   activeTab: Tab;
   problem: any;
   statement: ProblemStatement | undefined;
   color: string;
+  visualizerSteps?: (import('../components/visualizers/types').VisualizerData | null)[];
 }) {
+  const animation = algorithmAnimations[problem.id];
   const opacity = useSharedValue(0);
   const translateX = useSharedValue(16);
 
@@ -173,7 +183,7 @@ function TabContent({ activeTab, problem, statement, color }: {
         <StepGuide
           steps={problem.steps}
           accentColor={color}
-          visualizers={problemVisualizers[problem.id] ?? undefined}
+          visualizers={visualizerSteps}
         />
       )}
       {activeTab === 'intuition' && (
@@ -185,7 +195,25 @@ function TabContent({ activeTab, problem, statement, color }: {
       {activeTab === 'example' && (
         <ExampleTab example={problem.example} color={color} />
       )}
+      {activeTab === 'animate' && (
+        animation
+          ? <AlgorithmPlayer animation={animation} accentColor={color} />
+          : <NoAnimationPlaceholder color={color} />
+      )}
     </Animated.View>
+  );
+}
+
+function NoAnimationPlaceholder({ color }: { color: string }) {
+  return (
+    <View style={styles.noAnimBox}>
+      <Text style={styles.noAnimIcon}>🎬</Text>
+      <Text style={[styles.noAnimTitle, { color }]}>Coming Soon</Text>
+      <Text style={styles.noAnimText}>
+        Animation not yet available for this problem.{'\n'}
+        Check back after more problems are visualized.
+      </Text>
+    </View>
   );
 }
 
@@ -502,4 +530,17 @@ const styles = StyleSheet.create({
   },
   exampleTabLabel: { ...typography.caption, fontWeight: '700', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 },
   exampleTabValue: { ...typography.body, color: colors.text },
+
+  // No animation placeholder
+  noAnimBox: {
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.lg,
+    padding: spacing.xl,
+    marginVertical: spacing.md,
+    alignItems: 'center',
+    gap: 8,
+  },
+  noAnimIcon: { fontSize: 40 },
+  noAnimTitle: { ...typography.h3, fontWeight: '700', marginTop: 4 },
+  noAnimText: { ...typography.body, color: colors.textMuted, textAlign: 'center', lineHeight: 24 },
 });

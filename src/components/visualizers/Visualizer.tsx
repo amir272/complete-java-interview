@@ -10,6 +10,7 @@ import { IntervalVisualizer } from './IntervalVisualizer';
 import { GridVisualizer } from './GridVisualizer';
 import { LinkedListVisualizer } from './LinkedListVisualizer';
 import { HashMapVisualizer } from './HashMapVisualizer';
+import { PointerListVisualizer } from './PointerListVisualizer';
 
 interface VisualizerProps {
   data: VisualizerData;
@@ -88,6 +89,14 @@ export function Visualizer({ data, prevData }: VisualizerProps) {
           entries={data.entries}
           caption={data.caption}
           prevEntries={prevData?.type === 'hashmap' ? prevData.entries : undefined}
+        />
+      )}
+
+      {data.type === 'pointer-list' && (
+        <PointerListVisualizer
+          rows={data.rows}
+          caption={data.caption}
+          prevRows={prevData?.type === 'pointer-list' ? prevData.rows : undefined}
         />
       )}
     </View>
